@@ -7,6 +7,18 @@ Watch 500+ live india TV channels with **IPTV Android Application**
 - [Mobile APK Download Link](https://github.com/kananinirav/Indian-IPTV-App/releases/download/v2.1.0/iptv-mobile.apk)
 - [Android TV APK Download Link](https://github.com/kananinirav/Indian-IPTV-App/releases/download/v2.1.0/iptv-android-tv.apk)
 
+## Disclaimer 📢
+
+> [!IMPORTANT]
+> - This app is a simple M3U streaming player.
+> - It does not host or provide any media content.
+> - All streams come from third-party sources.
+> - The developer is not responsible for the legality or availability of external content.
+
+## Credits
+
+[Channel Source](https://github.com/FunctionError/PiratesTv)
+
 ## Feature
 
 - 500+ live Tv Channels
@@ -34,15 +46,6 @@ Watch 500+ live india TV channels with **IPTV Android Application**
 </p>
 
 **If you find this helpful, please give a star to this repository and share it with your friends. Your support is greatly appreciated!**
-
-## Disclaimer 📢
-
-- IPTV operates as a simple m3u streaming player.
-- Any issues regarding internet regulations should be addressed directly to the source website. The developer assumes no legal responsibility.
-
-## Credits
-
-[Channel Source](https://github.com/FunctionError/PiratesTv)
 
 ## Star History
 
