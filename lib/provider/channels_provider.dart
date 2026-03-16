@@ -1,77 +1,54 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
+import '../constants.dart';
 import '../model/channel.dart';
+import '../repositories/channels_repository.dart';
+import '../services/m3u_parser.dart';
 
-class ChannelsProvider with ChangeNotifier {
-  List<Channel> channels = [];
-  List<Channel> filteredChannels = [];
-  String sourceUrl =
-      'https://raw.githubusercontent.com/FunctionError/PiratesTv/main/combined_playlist.m3u';
+class ChannelsProvider extends ChangeNotifier {
+  ChannelsProvider({
+    ChannelsRepository? repository,
+    String? initialUrl,
+  })  : _repository = repository ?? ChannelsRepository(M3uParser()),
+        _sourceUrl = initialUrl ?? AppConstants.defaultM3uUrl;
 
-  Future<List<Channel>> fetchM3UFile() async {
-    final response = await http.get(Uri.parse(sourceUrl));
-    if (response.statusCode == 200) {
-      String fileText = response.body;
-      List<String> lines = fileText.split('\n');
+  final ChannelsRepository _repository;
+  String _sourceUrl;
+  final List<Channel> _channels = [];
+  final List<Channel> _filteredChannels = [];
 
-      String? name;
-      String logoUrl = getDefaultLogoUrl();
-      String? streamUrl;
+  String get sourceUrl => _sourceUrl;
+  List<Channel> get channels => _channels;
+  List<Channel> get filteredChannels => _filteredChannels;
 
-      for (String line in lines) {
-        if (line.startsWith('#EXTINF:')) {
-          name = extractChannelName(line);
-          logoUrl = extractLogoUrl(line) ?? getDefaultLogoUrl();
-        } else if (line.isNotEmpty) {
-          streamUrl = line;
-          if (name != null) {
-            channels.add(Channel(
-              name: name,
-              logoUrl: logoUrl,
-              streamUrl: streamUrl,
-            ));
-          }
-          // Reset for next channel
-          name = null;
-          logoUrl = getDefaultLogoUrl();
-          streamUrl = null;
-        }
-      }
-      return channels;
+  Future<void> loadChannels([String? url]) async {
+    if (url != null) {
+      _sourceUrl = url;
+    }
+    final data = await _repository.fetchChannels(_sourceUrl);
+    _channels
+      ..clear()
+      ..addAll(data);
+    _filteredChannels
+      ..clear()
+      ..addAll(data);
+    notifyListeners();
+  }
+
+  void filterChannels(String query) {
+    if (query.isEmpty) {
+      _filteredChannels
+        ..clear()
+        ..addAll(_channels);
     } else {
-      throw Exception('Failed to load M3U file');
+      _filteredChannels
+        ..clear()
+        ..addAll(
+          _channels.where(
+            (channel) => channel.name.toLowerCase().contains(query.toLowerCase()),
+          ),
+        );
     }
-  }
-
-  String getDefaultLogoUrl() {
-    return 'assets/images/tv-icon.png';
-  }
-
-  String? extractChannelName(String line) {
-    List<String> parts = line.split(',');
-    return parts.last;
-  }
-
-  String? extractLogoUrl(String line) {
-    List<String> parts = line.split('"');
-    if (parts.length > 1 && isValidUrl(parts[1])) {
-      return parts[1];
-    } else if (parts.length > 5 && isValidUrl(parts[5])) {
-      return parts[5];
-    }
-    return null;
-  }
-
-  bool isValidUrl(String url) {
-    return url.startsWith('https') || url.startsWith('http');
-  }
-
-  List<Channel> filterChannels(String query) {
-    filteredChannels = channels
-        .where((channel) =>
-            channel.name.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    return filteredChannels;
+    notifyListeners();
   }
 }

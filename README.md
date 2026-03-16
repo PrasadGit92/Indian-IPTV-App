@@ -1,51 +1,90 @@
-# IPTV
+# Indian IPTV App
 
-Watch 500+ live india TV channels with **IPTV Android Application**
+A Flutter-based IPTV application for streaming live Indian TV channels from M3U playlists.
 
-## [Download Latest APK From Release](https://github.com/kananinirav/iptv-indian-app/releases/)
+## Tech Stack
 
-- [Mobile APK Download Link](https://github.com/kananinirav/Indian-IPTV-App/releases/download/v2.1.0/iptv-mobile.apk)
-- [Android TV APK Download Link](https://github.com/kananinirav/Indian-IPTV-App/releases/download/v2.1.0/iptv-android-tv.apk)
+- **Framework**: Flutter (Dart)
+- **State Management**: Provider (ChangeNotifier)
+- **Video Playback**: video_player, chewie
+- **Networking**: http
+- **Other**: wakelock (screen keep awake)
 
-## Disclaimer 📢
+## Project Structure
 
-> [!IMPORTANT]
-> - This app is a simple M3U streaming player.
-> - It does not host or provide any media content.
-> - All streams come from third-party sources.
-> - The developer is not responsible for the legality or availability of external content.
+```
+lib/
+├── constants.dart          # App-wide constants and configurations
+├── main.dart               # App entry point with Provider setup
+├── model/
+│   └── channel.dart        # Channel data model
+├── provider/
+│   └── channels_provider.dart  # State management for channels
+├── repositories/
+│   └── channels_repository.dart # Data fetching abstraction
+├── screens/
+│   ├── home.dart           # Main screen with channel list and search
+│   └── player.dart         # Video player screen
+├── services/
+│   └── m3u_parser.dart     # M3U playlist parsing logic
+└── widgets/
+    └── channel_list_item.dart # Reusable channel list item widget
+```
 
-## Credits
+## Dependencies
 
-[Channel Source](https://github.com/FunctionError/PiratesTv)
+Add the following to your `pubspec.yaml`:
 
-## Feature
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  video_player: ^2.8.2
+  http: ^1.2.0
+  chewie: ^1.5.0
+  wakelock: ^0.6.2
+  provider: ^6.1.1
+```
 
-- 500+ live Tv Channels
-- Search Channels
-- Full Screen View
+## How to Run
 
-<h3 align="center">"I strongly advise against publishing it on the Play Store as it may result in the suspension of your account due to Google's privacy policy."</h3>
+1. Ensure Flutter SDK is installed and configured.
+2. Clone the repository.
+3. Run `flutter pub get` to install dependencies.
+4. Connect a device or start an emulator.
+5. Run `flutter run` to launch the app.
 
-## Sample Image
+For Android TV:
+- Use `flutter run --device-id <tv-device-id>` to target Android TV.
 
-### Android Mobile
+## Usage
 
-<p float="left">
-  <img src="./images/1.png" width="200" height='411' />
-  <img src="./images/2.png" width="200" height='411' />
-  <img src="./images/4.png" width="200" height='411' />
-  <img src="./images/5.png" width="200" height='411' />
-</p>
+### Loading Channels
+- Enter an M3U playlist URL in the source URL field on the home screen.
+- Tap "Load" to fetch and parse the playlist.
 
-### Android TV
+### Searching Channels
+- Use the search bar to filter channels by name.
 
-<p float="left">
-  <img src="./images/tv-1.png" width="400" height='233' />
-  <img src="./images/tv-2.png" width="400" height='233' />
-</p>
+### Playing Channels
+- Tap on a channel in the list to open the player screen.
+- The player supports full-screen playback with controls via Chewie.
 
-**If you find this helpful, please give a star to this repository and share it with your friends. Your support is greatly appreciated!**
+### Technical Details
+
+- **M3U Parsing**: The `M3uParser` class extracts channel information (name, logo, stream URL) from M3U content.
+- **State Management**: `ChannelsProvider` uses ChangeNotifier to manage channel data and notify UI updates.
+- **Repository Pattern**: `ChannelsRepository` abstracts data fetching, allowing easy testing and dependency injection.
+- **UI Modularity**: `ChannelListItem` widget encapsulates channel display logic for reusability.
+- **Constants**: Centralized in `AppConstants` for DRY principle compliance.
+
+## Architecture Principles
+
+- **SOLID**: Single responsibility (e.g., separate parsing, fetching, state management).
+- **DRY**: Avoid repetition with constants and reusable widgets.
+- **KISS**: Simple, straightforward implementation.
+- **YAGNI**: Focused on essential features without over-engineering.
 
 ## Star History
 
@@ -65,4 +104,5 @@ Please Feel free to contribute by submitting a Pull Request!
 
 ## Visitors Count
 
-<img align="left" src = "https://profile-counter.glitch.me/Indian-IPTV-App/count.svg" alt ="Loading">
+<img align="left" src = "https://profile-counter.glitch.me/Indian-IPTV-App/count.svg" alt ="Loading"></content>
+<parameter name="filePath">c:\Users\mamat\OneDrive\Documents\GitHub\Indian-IPTV-App\README.md

@@ -37,10 +37,10 @@ dependencies:
   cupertino_icons: ^1.0.6
   video_player: ^2.8.2
   http: ^1.2.0
-  # lecle_yoyo_player: ^0.0.8
   chewie: ^1.5.0
-  animated_text_kit: ^4.2.2
   wakelock: ^0.6.2
+  provider: ^6.1.1
+  flutter_animate: ^4.5.0
 
 dev_dependencies:
   flutter_test:
@@ -52,6 +52,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  dart_code_metrics: ^4.19.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

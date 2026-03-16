@@ -1,59 +1,65 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '/screens/player.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
+
+import '../constants.dart';
 import '../model/channel.dart';
 import '../provider/channels_provider.dart';
+import '../widgets/channel_list_item.dart';
+import 'player.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
-  _HomeState createState() => _HomeState();
+  State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  List<Channel> channels = [];
-  List<Channel> filteredChannels = [];
-  TextEditingController searchController = TextEditingController();
-  final ChannelsProvider channelsProvider = ChannelsProvider();
-  bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _urlController = TextEditingController();
   Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    final provider = context.read<ChannelsProvider>();
+    _urlController.text = provider.sourceUrl;
+    _loadChannels();
   }
 
-  Future<void> fetchData() async {
+  Future<void> _loadChannels() async {
+    final provider = context.read<ChannelsProvider>();
     try {
-      final data = await channelsProvider.fetchM3UFile();
-      setState(() {
-        channels = data;
-        filteredChannels = data;
-        _isLoading = false;
-      });
+      await provider.loadChannels(_urlController.text);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('There was a problem finding the data')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppConstants.errorMessage)),
+        );
+      }
     }
   }
 
-  void filterChannels(String query) async {
-    if (_debounceTimer != null) {
-      _debounceTimer!.cancel();
-    }
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
-      final filteredData = channelsProvider.filterChannels(query);
-      setState(() {
-        filteredChannels = filteredData;
-      });
-    });
+  void _filterChannels(String query) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(
+      const Duration(milliseconds: AppConstants.searchDebounceMs),
+      () {
+        if (mounted) {
+          context.read<ChannelsProvider>().filterChannels(query);
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
+    _searchController.dispose();
+    _urlController.dispose();
     super.dispose();
   }
 
@@ -62,59 +68,81 @@ class _HomeState extends State<Home> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(AppConstants.cardMargin),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _urlController,
+                  decoration: const InputDecoration(
+                    labelText: AppConstants.sourceUrlLabel,
+                    hintText: AppConstants.sourceUrlHint,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppConstants.cardMargin),
+              FilledButton(
+                onPressed: _loadChannels,
+                child: const Text(AppConstants.loadButtonText),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(AppConstants.cardMargin),
           child: TextField(
-            controller: searchController,
-            onChanged: (value) {
-              filterChannels(value);
-            },
+            controller: _searchController,
+            onChanged: _filterChannels,
             decoration: const InputDecoration(
-              labelText: 'Search',
-              hintText: 'Search channels...',
+              labelText: AppConstants.searchLabel,
+              hintText: AppConstants.searchHint,
               prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(),
             ),
           ),
         ),
         Expanded(
-          child: _isLoading
-              ? const Center(
+          child: Consumer<ChannelsProvider>(
+            builder: (context, provider, child) {
+              if (provider.channels.isEmpty) {
+                return const Center(
                   child: CircularProgressIndicator(),
-                )
-              : ListView.builder(
-                  itemCount: filteredChannels.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: Image.network(
-                        filteredChannels[index].logoUrl,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            'assets/images/tv-icon.png',
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.contain,
-                          );
-                        },
-                      ),
-                      title: Text(filteredChannels[index].name),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Player(
-                              channel: filteredChannels[index],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                );
+              }
+              return ListView.builder(
+                itemCount: provider.filteredChannels.length,
+                itemBuilder: (context, index) {
+                  final channel = provider.filteredChannels[index];
+                  return ChannelListItem(
+                    channel: channel,
+                    onTap: () => _navigateToPlayer(channel),
+                  ).animate(
+                    delay: Duration(milliseconds: index * 50),
+                  ).fadeIn(
+                    duration: AppConstants.animationDuration,
+                    curve: AppConstants.animationCurve,
+                  ).slideY(
+                    begin: 0.2,
+                    end: 0,
+                    duration: AppConstants.animationDuration,
+                    curve: AppConstants.animationCurve,
+                  );
+                },
+              ).animate().fadeIn(duration: AppConstants.animationDuration);
+            },
+          ),
         ),
       ],
+    );
+  }
+
+  void _navigateToPlayer(Channel channel) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Player(channel: channel),
+      ),
     );
   }
 }
