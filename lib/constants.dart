@@ -23,5 +23,5 @@ class AppConstants {
   // Material Design 3 constants
   static const int primaryColorValue = 0xFF6750A4; // M3 purple seed
   static const Duration animationDuration = Duration(milliseconds: 400);
-  static final Curve animationCurve = Curves.easeOut;
+  static const Curve animationCurve = Curves.easeOut;
 }

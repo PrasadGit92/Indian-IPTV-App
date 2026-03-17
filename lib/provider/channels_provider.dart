@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants.dart';
 import '../model/channel.dart';
@@ -6,6 +7,8 @@ import '../repositories/channels_repository.dart';
 import '../services/m3u_parser.dart';
 
 class ChannelsProvider extends ChangeNotifier {
+  static const _favoritesKey = 'favorites';
+
   ChannelsProvider({
     ChannelsRepository? repository,
     String? initialUrl,
@@ -16,10 +19,37 @@ class ChannelsProvider extends ChangeNotifier {
   String _sourceUrl;
   final List<Channel> _channels = [];
   final List<Channel> _filteredChannels = [];
+  final Set<String> _favoriteUrls = {};
 
   String get sourceUrl => _sourceUrl;
   List<Channel> get channels => _channels;
   List<Channel> get filteredChannels => _filteredChannels;
+  List<String> get favoriteUrls => _favoriteUrls.toList();
+
+  bool isFavorite(Channel channel) => _favoriteUrls.contains(channel.streamUrl);
+
+  Future<void> loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getStringList(_favoritesKey);
+    if (stored != null) {
+      _favoriteUrls
+        ..clear()
+        ..addAll(stored);
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleFavorite(Channel channel) async {
+    if (_favoriteUrls.contains(channel.streamUrl)) {
+      _favoriteUrls.remove(channel.streamUrl);
+    } else {
+      _favoriteUrls.add(channel.streamUrl);
+    }
+
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_favoritesKey, _favoriteUrls.toList());
+  }
 
   Future<void> loadChannels([String? url]) async {
     if (url != null) {

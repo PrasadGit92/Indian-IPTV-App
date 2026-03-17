@@ -5,10 +5,10 @@ import 'constants.dart';
 import 'provider/channels_provider.dart';
 import 'screens/home.dart';
 
-void main() => runApp(M3UPlayer());
+void main() => runApp(const M3UPlayer());
 
 class M3UPlayer extends StatelessWidget {
-  M3UPlayer({super.key});
+  const M3UPlayer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,12 +22,12 @@ class M3UPlayer extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
-            seedColor: Color(AppConstants.primaryColorValue),
+            seedColor: const Color(AppConstants.primaryColorValue),
           ),
         ),
         home: Scaffold(
           appBar: AppBar(
-            title: Text(AppConstants.channelListTitle),
+            title: const Text(AppConstants.channelListTitle),
           ),
           body: const Home(),
         ),
